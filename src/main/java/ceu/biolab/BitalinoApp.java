@@ -5,55 +5,56 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.bluetooth.RemoteDevice;
 
 public class BitalinoApp extends JFrame {
 
     private BITalino bitalino;
-    private JComboBox<String> portCombo;
+    private JComboBox<RemoteDevice> deviceCombo;
     private JComboBox<Integer> samplingCombo;
     private JCheckBox[] channelChecks;
-    private JButton connectBtn, startBtn, stopBtn, closeBtn;
+    private JButton discoverBtn, connectBtn, startBtn, stopBtn, closeBtn;
     private JTextArea outputArea;
     private JScrollPane scrollPane;
-
-    // Panel for visualization
-    private SignalPanel signalPanel;
 
     private AtomicBoolean running = new AtomicBoolean(false);
     private Thread acquisitionThread;
 
-    // Keep last values for channels to draw
-    private int[] lastValues = new int[6];
-
     public BitalinoApp() {
-        super("BITalino GUI App");
+        super("BITalino Bluetooth GUI");
 
         bitalino = new BITalino();
 
-        // Top panel for port and sampling rate
+        // Top panel for device selection and sampling rate
         JPanel topPanel = new JPanel(new FlowLayout());
-        portCombo = new JComboBox<>();
-        topPanel.add(new JLabel("Port:"));
-        topPanel.add(portCombo);
+
+        deviceCombo = new JComboBox<>();
+        topPanel.add(new JLabel("Device:"));
+        topPanel.add(deviceCombo);
+
+        discoverBtn = new JButton("Discover");
+        topPanel.add(discoverBtn);
 
         samplingCombo = new JComboBox<>(new Integer[]{1, 10, 100, 1000});
         topPanel.add(new JLabel("Sampling Rate:"));
         topPanel.add(samplingCombo);
 
         connectBtn = new JButton("Connect");
-        startBtn = new JButton("Start");
-        stopBtn = new JButton("Stop");
-        closeBtn = new JButton("Close");
-
-        startBtn.setEnabled(false);
-        stopBtn.setEnabled(false);
-
+        connectBtn.setEnabled(false);
         topPanel.add(connectBtn);
+
+        startBtn = new JButton("Start");
+        startBtn.setEnabled(false);
         topPanel.add(startBtn);
+
+        stopBtn = new JButton("Stop");
+        stopBtn.setEnabled(false);
         topPanel.add(stopBtn);
+
+        closeBtn = new JButton("Close");
         topPanel.add(closeBtn);
 
-        // Channel selection
+        // Channel selection panel
         JPanel channelPanel = new JPanel(new FlowLayout());
         channelChecks = new JCheckBox[6];
         for (int i = 0; i < 6; i++) {
@@ -62,29 +63,22 @@ public class BitalinoApp extends JFrame {
         }
 
         // Output area
-        outputArea = new JTextArea(10, 50);
+        outputArea = new JTextArea(20, 50);
         outputArea.setEditable(false);
         scrollPane = new JScrollPane(outputArea);
 
-        // Visualization panel
-        signalPanel = new SignalPanel();
-        signalPanel.setPreferredSize(new Dimension(800, 200));
-
-        // Layout
+        // Add panels to frame
         setLayout(new BorderLayout());
         add(topPanel, BorderLayout.NORTH);
-        add(channelPanel, BorderLayout.WEST);
-        add(signalPanel, BorderLayout.CENTER);
+        add(channelPanel, BorderLayout.CENTER);
         add(scrollPane, BorderLayout.SOUTH);
 
         pack();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Discover devices on startup
-        discoverDevices();
-
         // Button actions
+        discoverBtn.addActionListener(this::discoverAction);
         connectBtn.addActionListener(this::connectAction);
         startBtn.addActionListener(this::startAction);
         stopBtn.addActionListener(this::stopAction);
@@ -95,35 +89,49 @@ public class BitalinoApp extends JFrame {
         });
     }
 
-    private void discoverDevices() {
-        try {
-            Vector<String> ports = bitalino.findDevices();
-            portCombo.removeAllItems();
-            for (String p : ports) portCombo.addItem(p);
-            if (ports.isEmpty()) outputArea.append("No BITalino ports found.\n");
-            else outputArea.append("Discovered BITalino ports: " + ports + "\n");
-        } catch (InterruptedException e) {
-            outputArea.append("Error discovering ports.\n");
-        }
+    private void discoverAction(ActionEvent e) {
+        deviceCombo.removeAllItems();
+        outputArea.append("Discovering devices...\n");
+        new Thread(() -> {
+            try {
+                Vector<RemoteDevice> devices = bitalino.findDevices();
+                SwingUtilities.invokeLater(() -> {
+                    for (RemoteDevice d : devices) deviceCombo.addItem(d);
+                    if (!devices.isEmpty()) {
+                        outputArea.append("Found " + devices.size() + " device(s)\n");
+                        connectBtn.setEnabled(true);
+                    } else {
+                        outputArea.append("No BITalino devices found.\n");
+                    }
+                });
+            } catch (InterruptedException ex) {
+                SwingUtilities.invokeLater(() -> outputArea.append("Discovery interrupted.\n"));
+            }
+        }).start();
     }
 
     private void connectAction(ActionEvent e) {
-        String port = (String) portCombo.getSelectedItem();
-        int rate = (Integer) samplingCombo.getSelectedItem();
-        if (port == null) {
-            outputArea.append("No port selected.\n");
+        RemoteDevice device = (RemoteDevice) deviceCombo.getSelectedItem();
+        if (device == null) {
+            outputArea.append("No device selected.\n");
             return;
         }
-        try {
-            bitalino.open(port, rate);
-            outputArea.append("Connected to " + port + " at " + rate + " Hz\n");
-            connectBtn.setEnabled(false);
-            startBtn.setEnabled(true);
-        } catch (BITalinoException ex) {
-            outputArea.append("Error connecting: " + ex.getMessage() + "\n");
-        } catch (Throwable ex) {
-            outputArea.append("Unexpected error: " + ex.getMessage() + "\n");
-        }
+
+        int rate = (Integer) samplingCombo.getSelectedItem();
+        outputArea.append("Connecting to " + device.getBluetoothAddress() + " at " + rate + " Hz...\n");
+
+        new Thread(() -> {
+            try {
+                bitalino.open(device.getBluetoothAddress(), rate);
+                SwingUtilities.invokeLater(() -> {
+                    outputArea.append("Connected!\n");
+                    connectBtn.setEnabled(false);
+                    startBtn.setEnabled(true);
+                });
+            } catch (Throwable ex) {
+                SwingUtilities.invokeLater(() -> outputArea.append("Connection failed: " + ex.getMessage() + "\n"));
+            }
+        }).start();
     }
 
     private void startAction(ActionEvent e) {
@@ -137,14 +145,12 @@ public class BitalinoApp extends JFrame {
             outputArea.append("Acquisition started on channels: ");
             for (int c : channels) outputArea.append((c + 1) + " ");
             outputArea.append("\n");
-
             running.set(true);
             startBtn.setEnabled(false);
             stopBtn.setEnabled(true);
 
             acquisitionThread = new Thread(this::readLoop);
             acquisitionThread.start();
-
         } catch (Throwable ex) {
             outputArea.append("Error starting acquisition: " + ex.getMessage() + "\n");
         }
@@ -157,15 +163,12 @@ public class BitalinoApp extends JFrame {
     private void stopAcquisition() {
         running.set(false);
         if (acquisitionThread != null) {
-            try {
-                acquisitionThread.join();
-            } catch (InterruptedException ignored) {
-            }
+            try { acquisitionThread.join(); } catch (InterruptedException ignored) {}
         }
         try {
             bitalino.stop();
             outputArea.append("Acquisition stopped.\n");
-        } catch (BITalinoException ex) {
+        } catch (Exception ex) {
             outputArea.append("Error stopping acquisition: " + ex.getMessage() + "\n");
         }
         startBtn.setEnabled(true);
@@ -176,7 +179,7 @@ public class BitalinoApp extends JFrame {
         try {
             bitalino.close();
             outputArea.append("Device closed.\n");
-        } catch (BITalinoException ex) {
+        } catch (Exception ex) {
             outputArea.append("Error closing device: " + ex.getMessage() + "\n");
         }
     }
@@ -195,40 +198,16 @@ public class BitalinoApp extends JFrame {
                 Frame[] frames = bitalino.read(blockSize);
                 SwingUtilities.invokeLater(() -> {
                     for (Frame f : frames) {
+                        StringBuilder sb = new StringBuilder("Seq: ").append(f.seq).append(" | ");
                         for (int i = 0; i < f.analog.length; i++) {
-                            lastValues[i] = f.analog[i];
+                            sb.append("A").append(i + 1).append(": ").append(f.analog[i]).append(" ");
                         }
-                        signalPanel.updateSignal(lastValues);
+                        outputArea.append(sb.toString() + "\n");
+                        outputArea.setCaretPosition(outputArea.getDocument().getLength());
                     }
                 });
             } catch (BITalinoException ex) {
                 SwingUtilities.invokeLater(() -> outputArea.append("Error reading: " + ex.getMessage() + "\n"));
-            }
-        }
-    }
-
-    // Panel to draw live signal
-    private static class SignalPanel extends JPanel {
-        private int[] values = new int[6];
-
-        public void updateSignal(int[] newValues) {
-            System.arraycopy(newValues, 0, values, 0, values.length);
-            repaint();
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            int w = getWidth();
-            int h = getHeight();
-            g.setColor(Color.BLACK);
-            g.fillRect(0, 0, w, h);
-
-            Color[] colors = {Color.RED, Color.GREEN, Color.BLUE, Color.YELLOW, Color.CYAN, Color.MAGENTA};
-            for (int ch = 0; ch < values.length; ch++) {
-                g.setColor(colors[ch]);
-                int y = h - (values[ch] * h / 1024); // scale 0–1023 to panel height
-                g.fillOval(50 + ch * 100, y, 10, 10);
             }
         }
     }
