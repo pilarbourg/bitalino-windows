@@ -3,14 +3,12 @@ package ceu.biolab;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.bluetooth.RemoteDevice;
 
 public class BitalinoApp extends JFrame {
 
     private BITalino bitalino;
-    private JComboBox<RemoteDevice> deviceCombo;
     private JComboBox<Integer> samplingCombo;
     private JButton connectBtn, startBtn, stopBtn, closeBtn;
     private JTextArea outputArea;
@@ -25,14 +23,13 @@ public class BitalinoApp extends JFrame {
 
         bitalino = new BITalino();
 
-        // Top panel for device selection and sampling rate
         JPanel topPanel = new JPanel(new FlowLayout());
 
         macField = new JTextField(17); // MAC format XX:XX:XX:XX:XX:XX
         topPanel.add(new JLabel("MAC Address:"));
         topPanel.add(macField);
 
-        samplingCombo = new JComboBox<>(new Integer[]{1, 10, 100, 1000});
+        samplingCombo = new JComboBox<>(new Integer[]{10, 100, 1000});
         topPanel.add(new JLabel("Sampling Rate:"));
         topPanel.add(samplingCombo);
 
@@ -104,8 +101,7 @@ public class BitalinoApp extends JFrame {
 
         try {
             bitalino.start(channels);
-            outputArea.append("Acquisition started on channel A1: ");
-            for (int c : channels) outputArea.append((c + 1) + " ");
+            outputArea.append("Acquisition started on channel A1");
             outputArea.append("\n");
             running.set(true);
             startBtn.setEnabled(false);
