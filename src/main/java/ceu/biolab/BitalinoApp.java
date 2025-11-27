@@ -13,12 +13,12 @@ public class BitalinoApp extends JFrame {
 
     private BITalino bitalino;
     private JComboBox<Integer> samplingCombo;
+    private JComboBox<String> typeCombo;
     private JButton connectBtn, startBtn, stopBtn, closeBtn;
     private JTextArea outputArea;
     private JScrollPane scrollPane;
     private JTextField macField;
     private JButton saveBtn;
-    private File lastRecordedFile;
     private BufferedWriter writer;
     private boolean firstSample = true;
     private File currentAcquisitionFile;
@@ -37,6 +37,10 @@ public class BitalinoApp extends JFrame {
         macField = new JTextField(17); // MAC format XX:XX:XX:XX:XX:XX
         topPanel.add(new JLabel("MAC Address:"));
         topPanel.add(macField);
+
+        typeCombo = new JComboBox<>(new String[]{"EMG", "ECG"});
+        topPanel.add(new JLabel("Type of recording"));
+        topPanel.add(typeCombo);
 
         samplingCombo = new JComboBox<>(new Integer[]{10, 100, 1000});
         topPanel.add(new JLabel("Sampling Rate:"));
@@ -111,7 +115,17 @@ public class BitalinoApp extends JFrame {
     }
 
     private void startAction(ActionEvent e) {
-        int[] channels = {1};
+        int [] channels = null;
+        String type = typeCombo.getSelectedItem().toString();
+        if (type.equals("EMG")) {
+            channels = new int[]{0};   // a1
+        } else if (type.equals("ECG")) {
+            channels = new int[]{1};   // a2
+        } else {
+            outputArea.append("Please select a type of recording.\n");
+            return; // evita continuar con channels = null
+        }
+
 
         try {
             currentAcquisitionFile = File.createTempFile("bitalino_recording_", ".txt");
