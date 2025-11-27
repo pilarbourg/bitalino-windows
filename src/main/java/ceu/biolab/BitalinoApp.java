@@ -3,6 +3,9 @@ package ceu.biolab;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.bluetooth.RemoteDevice;
 
@@ -14,6 +17,12 @@ public class BitalinoApp extends JFrame {
     private JTextArea outputArea;
     private JScrollPane scrollPane;
     private JTextField macField;
+    private JButton saveBtn;
+    private File lastRecordedFile;
+    private BufferedWriter writer;
+    private boolean firstSample = true;
+    private File currentAcquisitionFile;
+
 
     private AtomicBoolean running = new AtomicBoolean(false);
     private Thread acquisitionThread;
@@ -45,6 +54,10 @@ public class BitalinoApp extends JFrame {
         stopBtn.setEnabled(false);
         topPanel.add(stopBtn);
 
+        saveBtn = new JButton("Save");
+        saveBtn.setEnabled(false);
+        topPanel.add(saveBtn);
+
         closeBtn = new JButton("Close");
         topPanel.add(closeBtn);
 
@@ -68,6 +81,8 @@ public class BitalinoApp extends JFrame {
             closeDevice();
             System.exit(0);
         });
+        saveBtn.addActionListener(e -> saveFileAction());
+
     }
 
     private void connectAction(ActionEvent e) {
@@ -95,11 +110,15 @@ public class BitalinoApp extends JFrame {
         }).start();
     }
 
-
     private void startAction(ActionEvent e) {
         int[] channels = {1};
 
         try {
+            currentAcquisitionFile = File.createTempFile("bitalino_recording_", ".txt");
+            writer = new BufferedWriter(new FileWriter(currentAcquisitionFile, false));
+
+            writer.write(String.valueOf(samplingCombo.getSelectedItem()));
+            writer.newLine();
             bitalino.start(channels);
             outputArea.append("Acquisition started on channel A1");
             outputArea.append("\n");
@@ -116,6 +135,9 @@ public class BitalinoApp extends JFrame {
 
     private void stopAction(ActionEvent e) {
         stopAcquisition();
+        if (currentAcquisitionFile != null && currentAcquisitionFile.exists()) {
+            saveBtn.setEnabled(true);
+        }
     }
 
     private void stopAcquisition() {
@@ -128,12 +150,13 @@ public class BitalinoApp extends JFrame {
         }
         try {
             bitalino.stop();
-            outputArea.append("Acquisition stopped.\n");
+            //outputArea.append("Acquisition stopped.\n");
         } catch (Exception ex) {
             outputArea.append("Error stopping acquisition: " + ex.getMessage() + "\n");
         }
         startBtn.setEnabled(true);
         stopBtn.setEnabled(false);
+
     }
 
     private void closeDevice() {
@@ -145,27 +168,82 @@ public class BitalinoApp extends JFrame {
         }
     }
 
-    private void readLoop() {
-        final int blockSize = 5;
-        while (running.get()) {
+    private void saveFileAction() {
+        if (currentAcquisitionFile == null) {
+            JOptionPane.showMessageDialog(this, "No recording available to save.");
+            return;
+        }
+
+        JFileChooser chooser = new JFileChooser();
+        chooser.setDialogTitle("Save recording");
+        chooser.setSelectedFile(new File("bitalino_recording.txt"));
+
+        int option = chooser.showSaveDialog(this);
+
+        if (option == JFileChooser.APPROVE_OPTION) {
+            File dest = chooser.getSelectedFile();
             try {
-                Frame[] frames = bitalino.read(blockSize);
-                SwingUtilities.invokeLater(() -> {
-                    for (Frame f : frames) {
-                        StringBuilder sb = new StringBuilder("Seq: ").append(f.seq).append(" | ");
-                        for (int i = 0; i < f.analog.length; i++) {
-                            sb.append("A").append(i + 1).append(": ").append(f.analog[i]).append(" ");
-                        }
-                        outputArea.append(sb.toString() + "\n");
-                        outputArea.setCaretPosition(outputArea.getDocument().getLength());
-                    }
-                });
-            } catch (BITalinoException ex) {
-                SwingUtilities.invokeLater(() -> outputArea.append("Error reading: " + ex.getMessage() + "\n"));
+                java.nio.file.Files.copy(
+                        currentAcquisitionFile.toPath(),
+                        dest.toPath(),
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                );
+
+                outputArea.append("File saved to: " + dest.getAbsolutePath() + "\n");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Error saving file: " + ex.getMessage());
             }
         }
     }
 
+
+    private void readLoop() {
+        final int blockSize = 10;
+
+        try {
+            // Segunda línea: empezamos una línea de datos
+            firstSample = true;
+
+            while (running.get()) {
+                Frame[] frames = bitalino.read(blockSize);
+
+                for (Frame f : frames) {
+                    int a2 = f.analog[0];
+
+                    // Escribir en buffer → valores separados por comas
+                    if (!firstSample) {
+                        writer.write(",");
+                    }
+                    writer.write(Integer.toString(a2));
+                    firstSample = false;
+
+                    // Mostrar en GUI
+                    long ts = System.currentTimeMillis();
+                    String text = "t=" + ts + " | A2=" + a2 + "\n";
+                    SwingUtilities.invokeLater(() -> {
+                        outputArea.append(text);
+                        outputArea.setCaretPosition(outputArea.getDocument().getLength());
+                    });
+                }
+            }
+
+            // Cuando termina la adquisición → cerrar línea
+            writer.newLine();
+            writer.flush();
+
+            SwingUtilities.invokeLater(() ->
+                    outputArea.append("Acquisition stopped.\n"));
+
+        } catch (Throwable ex) {
+            SwingUtilities.invokeLater(() ->
+                    outputArea.append("Error during acquisition: " + ex.getMessage() + "\n"));
+        } finally {
+            try {
+                if (writer != null) writer.close();
+            } catch (Exception ignored) {}
+        }
+    }
+//98:D3:91:FD:69:49
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new BitalinoApp().setVisible(true));
     }
