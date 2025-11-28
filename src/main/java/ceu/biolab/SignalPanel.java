@@ -50,12 +50,11 @@ public class SignalPanel extends JPanel {
         int w = getWidth();
         int h = getHeight();
 
-        // === GRID: líneas de puntitos formando cuadrados ===
-        int spacing = 20; // tamaño del cuadrito (puedes cambiar a 10, 25, etc.)
+        // grid
+        int spacing = 16;
 
         g2.setColor(new Color(180, 180, 180, 120)); // gris suave
         float[] dash = {1f, spacing - 1f};          // 1px dibujado, resto hueco
-        Stroke oldStroke = g2.getStroke();
         g2.setStroke(new BasicStroke(
                 1f,
                 BasicStroke.CAP_ROUND,   // extremos redondos → parecen puntos
@@ -76,7 +75,7 @@ public class SignalPanel extends JPanel {
 
         // línea central (si la quieres más marcada)
         g2.setStroke(new BasicStroke(0.5f));
-        g2.setColor(new Color(150, 150, 150, 150));
+        g2.setColor(new Color(0, 0, 0, 150));
         int midY = h / 2;
         g2.drawLine(0, midY, w, midY);
 
@@ -85,7 +84,7 @@ public class SignalPanel extends JPanel {
         int max = samples.stream().max(Integer::compareTo).orElse(1);
         int range = Math.max(1, max - min);
 
-        g2.setColor(new Color(255, 100, 100, 229));
+        g2.setColor(new Color(198, 0, 0));
         g2.setStroke(new BasicStroke(1.5f));
 
         int prevX = 0;

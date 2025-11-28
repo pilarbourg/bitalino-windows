@@ -30,121 +30,23 @@ public class BitalinoApp extends JFrame {
     private Thread acquisitionThread;
 
     public BitalinoApp() {
-        super("BITalino Bluetooth GUI");
-
-        // === Ventana moderna ===
-        setUndecorated(true);                        // sin barra de título ni X
-        setExtendedState(JFrame.MAXIMIZED_BOTH);     // pantalla completa
-        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE); // solo se cierra con tu botón "Close"
-
         bitalino = new BITalino();
+        setUndecorated(true);
+        setExtendedState(JFrame.MAXIMIZED_BOTH);
+        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
-        // === Barra superior (estilo toolbar) ===
-        // === Barra superior EN UNA SOLA LÍNEA ===
-        JPanel topPanel = new JPanel();
-        topPanel.setBackground(new Color(255, 180, 180, 168));
-        topPanel.setBorder(new EmptyBorder(20, 30, 20, 30));
-        topPanel.setPreferredSize(new Dimension(1920, 120));
+        // Panel raíz
+        JPanel root = new JPanel(new BorderLayout());
+        root.setBackground(Color.WHITE);  // solo para que no se vea gris
 
-// Layout horizontal estilo "flexbox"
-        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.X_AXIS));
-
-// === Fuentes grandes ===
-        Font labelFont = new Font("SansSerif", Font.BOLD, 18);
-        Font fieldFont = new Font("SansSerif", Font.PLAIN, 18);
-        Font buttonFont = new Font("SansSerif", Font.BOLD, 18);
-
-// ---------- MAC LABEL ----------
-        JLabel macLabel = new JLabel("MAC Address:");
-        macLabel.setFont(labelFont);
-        macLabel.setForeground(Color.WHITE);
-        topPanel.add(macLabel);
-        topPanel.add(Box.createRigidArea(new Dimension(15, 0)));
-
-// ---------- CAMPO MAC (mitad de la pantalla) ----------
-        macField = new JTextField();
-        macField.setFont(fieldFont);
-        macField.setMaximumSize(new Dimension(900, 40)); // mitad del monitor aprox
-        macField.setPreferredSize(new Dimension(900, 40));
-        topPanel.add(macField);
-
-        topPanel.add(Box.createRigidArea(new Dimension(40, 0)));
-
-
-// ---------- TYPE ----------
-        JLabel typeLabel = new JLabel("Type of recording");
-        typeLabel.setFont(labelFont);
-        typeLabel.setForeground(Color.WHITE);
-        topPanel.add(typeLabel);
-
-        topPanel.add(Box.createRigidArea(new Dimension(15, 0)));
-
-        typeCombo = new JComboBox<>(new String[]{"EMG", "ECG"});
-        typeCombo.setFont(fieldFont);
-        typeCombo.setMaximumSize(new Dimension(120, 40));
-        topPanel.add(typeCombo);
-
-        topPanel.add(Box.createRigidArea(new Dimension(40, 0)));
-
-
-// ---------- SAMPLING ----------
-        JLabel srLabel = new JLabel("Sampling Rate:");
-        srLabel.setFont(labelFont);
-        srLabel.setForeground(Color.WHITE);
-        topPanel.add(srLabel);
-
-        topPanel.add(Box.createRigidArea(new Dimension(15, 0)));
-
-        samplingCombo = new JComboBox<>(new Integer[]{10, 100, 1000});
-        samplingCombo.setFont(fieldFont);
-        samplingCombo.setMaximumSize(new Dimension(120, 40));
-        topPanel.add(samplingCombo);
-
-        topPanel.add(Box.createRigidArea(new Dimension(40, 0)));
-
-
-// === BOTONES GRANDES ===
-        connectBtn = createToolbarButton("Connect");
-        startBtn   = createToolbarButton("Start");
-        stopBtn    = createToolbarButton("Stop");
-        saveBtn    = createToolbarButton("Save");
-        closeBtn   = createToolbarButton("Close");
-
-        connectBtn.setFont(buttonFont);
-        startBtn.setFont(buttonFont);
-        stopBtn.setFont(buttonFont);
-        saveBtn.setFont(buttonFont);
-        closeBtn.setFont(buttonFont);
-
-        Dimension bigButtonSize = new Dimension(130, 45);
-        connectBtn.setPreferredSize(bigButtonSize);
-        startBtn.setPreferredSize(bigButtonSize);
-        stopBtn.setPreferredSize(bigButtonSize);
-        saveBtn.setPreferredSize(bigButtonSize);
-        closeBtn.setPreferredSize(bigButtonSize);
-
-        connectBtn.setEnabled(true);
-        startBtn.setEnabled(false);
-        stopBtn.setEnabled(false);
-        saveBtn.setEnabled(false);
-
-// Añadir botones
-        topPanel.add(connectBtn);
-        topPanel.add(Box.createRigidArea(new Dimension(10, 0)));
-        topPanel.add(startBtn);
-        topPanel.add(Box.createRigidArea(new Dimension(10, 0)));
-        topPanel.add(stopBtn);
-        topPanel.add(Box.createRigidArea(new Dimension(10, 0)));
-        topPanel.add(saveBtn);
-        topPanel.add(Box.createRigidArea(new Dimension(10, 0)));
-        topPanel.add(closeBtn);
-
-
+        // ====== CABECERA (dos barras) ======
+        JPanel headerPanel = crearHeaderPanel();  // -> función que te pongo abajo
+        root.add(headerPanel, BorderLayout.NORTH);
 
         // === Zona inferior: gráfica + logs ===
         outputArea = new JTextArea(8, 50);
         outputArea.setEditable(false);
-        outputArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        outputArea.setFont(new Font("Monospaced", Font.PLAIN, 16));
         scrollPane = new JScrollPane(outputArea);
 
         signalPanel = new SignalPanel();
@@ -166,9 +68,10 @@ public class BitalinoApp extends JFrame {
         splitPane.setResizeWeight(0.7);
 
         // === Layout principal ===
-        setLayout(new BorderLayout());
-        add(topPanel, BorderLayout.NORTH);
-        add(splitPane, BorderLayout.CENTER);  // <-- solo el splitPane, nada más
+        //setLayout(new BorderLayout());
+        //add(topPanel, BorderLayout.NORTH);
+        root.add(splitPane, BorderLayout.CENTER);  // <-- solo el splitPane, nada más
+        setContentPane(root);
 
         pack();
         setLocationRelativeTo(null); // en fullscreen no importa mucho, pero lo dejamos
@@ -189,6 +92,127 @@ public class BitalinoApp extends JFrame {
         setSize(screenSize);
         setLocation(0, 0);
     }
+
+    private JPanel crearHeaderPanel() {
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setPreferredSize(new Dimension(1920, 111));
+
+        // ===== BARRA SUPERIOR (CLOSE) =====
+        JPanel closeBar = new JPanel(new BorderLayout());
+        closeBar.setOpaque(true);
+        closeBar.setBackground(new Color(244, 234, 234, 242));
+        closeBar.setBorder(new EmptyBorder(5, 10, 5, 10));
+
+        Font buttonFont = new Font("Serif", Font.BOLD, 18);
+
+        closeBtn = createToolbarButton("Close");
+        closeBtn.setFont(buttonFont);
+        closeBtn.setPreferredSize(new Dimension(100, 30));
+
+        closeBar.add(closeBtn, BorderLayout.EAST);
+
+        // ===== BARRA INFERIOR (CONTROLES) =====
+        JPanel controlsBar = new JPanel();
+        controlsBar.setOpaque(true);
+        controlsBar.setBackground(new Color(146, 162, 218, 199));
+        controlsBar.setBorder(new EmptyBorder(15, 30, 15, 30));
+        controlsBar.setLayout(new BoxLayout(controlsBar, BoxLayout.X_AXIS));
+
+        Font labelFont  = new Font("Serif", Font.BOLD, 18);
+        Font fieldFont  = new Font("Monospaced", Font.BOLD, 18);
+
+        // IZQUIERDA
+        JPanel leftPanel = new JPanel();
+        leftPanel.setOpaque(false);
+        leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.X_AXIS));
+
+        JLabel macLabel = new JLabel("MAC Address:");
+        macLabel.setFont(labelFont);
+        macLabel.setForeground(Color.BLACK);
+        leftPanel.add(macLabel);
+        leftPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+
+        macField = new JTextField();
+        macField.setFont(fieldFont);
+        macField.setMaximumSize(new Dimension(300, 35));
+        macField.setMaximumSize(new Dimension(480, 35));
+        macField.setPreferredSize(new Dimension(600, 35));
+        leftPanel.add(macField);
+        leftPanel.add(Box.createRigidArea(new Dimension(30, 0)));
+
+
+        JLabel srLabel = new JLabel("Sampling Rate:");
+        srLabel.setFont(labelFont);
+        srLabel.setForeground(Color.black);
+        leftPanel.add(srLabel);
+        leftPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+
+        samplingCombo = new JComboBox<>(new Integer[]{10, 100, 1000});
+        samplingCombo.setFont(fieldFont);
+        samplingCombo.setMaximumSize(new Dimension(120, 35));
+        leftPanel.add(samplingCombo);
+        leftPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+        connectBtn = createToolbarButton("Connect");
+        leftPanel.add(connectBtn);
+        //leftPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+
+
+
+        // DERECHA
+
+        JPanel rightPanel = new JPanel();
+        rightPanel.setOpaque(false);
+        rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.X_AXIS));
+
+        JLabel typeLabel = new JLabel("Type of recording:");
+        typeLabel.setFont(labelFont);
+        typeLabel.setForeground(Color.black);
+        rightPanel.add(typeLabel);
+        typeCombo = new JComboBox<>(new String[]{"EMG", "ECG"});
+        typeCombo.setFont(fieldFont);
+        typeCombo.setMaximumSize(new Dimension(120, 35));
+        rightPanel.add(typeCombo);
+        rightPanel.add(Box.createRigidArea(new Dimension(30, 0)));
+
+        Dimension bigButtonSize = new Dimension(120, 40);
+
+        startBtn   = createToolbarButton("⏺");
+        startBtn.setFont(srLabel.getFont().deriveFont(21f));
+        startBtn.setForeground(new Color(175, 0, 0));
+        stopBtn    = createToolbarButton("⏹");
+        stopBtn.setFont(srLabel.getFont().deriveFont(19f));
+        stopBtn.setForeground(new Color(0, 0, 0));
+        stopBtn.setPreferredSize(new Dimension(50, 34));
+        saveBtn    = createToolbarButton("Save ⎙");
+
+        connectBtn.setFont(buttonFont);
+        //startBtn.setFont(buttonFont);
+        //stopBtn.setFont(buttonFont);
+        saveBtn.setFont(buttonFont);
+
+        connectBtn.setPreferredSize(bigButtonSize);
+        startBtn.setPreferredSize(bigButtonSize);
+        stopBtn.setPreferredSize(bigButtonSize);
+        saveBtn.setPreferredSize(bigButtonSize);
+
+
+        rightPanel.add(startBtn);
+        rightPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+        rightPanel.add(stopBtn);
+        rightPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+        rightPanel.add(saveBtn);
+
+        controlsBar.add(leftPanel);
+        controlsBar.add(Box.createRigidArea(new Dimension(80, 0)));
+        controlsBar.add(Box.createHorizontalGlue());
+        controlsBar.add(rightPanel);
+
+        headerPanel.add(closeBar, BorderLayout.NORTH);
+        headerPanel.add(controlsBar, BorderLayout.CENTER);
+
+        return headerPanel;
+    }
+
 
     private JButton createToolbarButton(String text) {
         JButton btn = new JButton(text);
@@ -381,6 +405,7 @@ public class BitalinoApp extends JFrame {
         }
     }
 //98:D3:91:FD:69:49
+    //0C:43:14:24:73:63
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
