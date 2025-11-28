@@ -39,11 +39,11 @@ public class BitalinoApp extends JFrame {
         JPanel root = new JPanel(new BorderLayout());
         root.setBackground(Color.WHITE);  // solo para que no se vea gris
 
-        // ====== CABECERA (dos barras) ======
+        //CABECERA (dos barras)
         JPanel headerPanel = crearHeaderPanel();  // -> función que te pongo abajo
         root.add(headerPanel, BorderLayout.NORTH);
 
-        // === Zona inferior: gráfica + logs ===
+        //Zona inferior: gráfica + logs
         outputArea = new JTextArea(8, 50);
         outputArea.setEditable(false);
         outputArea.setFont(new Font("Monospaced", Font.PLAIN, 16));
@@ -403,8 +403,12 @@ public class BitalinoApp extends JFrame {
         try {
             // Segunda línea: empezamos una línea de datos
             firstSample = true;
+            int durationSeconds = 2*60;
+            long maxDurationMs = durationSeconds * 1000L;
+            long startLoopTime = System.currentTimeMillis();
 
-            while (running.get()) {
+
+            while (running.get() && (System.currentTimeMillis() - startLoopTime) < maxDurationMs) {
                 Frame[] frames = bitalino.read(blockSize);
 
                 for (Frame f : frames) {
