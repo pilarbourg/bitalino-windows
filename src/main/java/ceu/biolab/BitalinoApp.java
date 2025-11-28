@@ -103,7 +103,7 @@ public class BitalinoApp extends JFrame {
         closeBar.setBackground(new Color(244, 234, 234, 242));
         closeBar.setBorder(new EmptyBorder(5, 10, 5, 10));
 
-        Font buttonFont = new Font("Serif", Font.BOLD, 18);
+        Font buttonFont = new Font("Open sans", Font.BOLD, 18);
 
         closeBtn = createToolbarButton("Close");
         closeBtn.setFont(buttonFont);
@@ -118,7 +118,7 @@ public class BitalinoApp extends JFrame {
         controlsBar.setBorder(new EmptyBorder(15, 30, 15, 30));
         controlsBar.setLayout(new BoxLayout(controlsBar, BoxLayout.X_AXIS));
 
-        Font labelFont  = new Font("Serif", Font.BOLD, 18);
+        Font labelFont  = new Font("Open sans", Font.BOLD, 18);
         Font fieldFont  = new Font("Monospaced", Font.BOLD, 18);
 
         // IZQUIERDA
