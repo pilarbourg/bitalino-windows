@@ -19,7 +19,7 @@ public class BitalinoApp extends JFrame {
     private JTextArea outputArea;
     private JScrollPane scrollPane;
     private JTextField macField;
-    private JButton saveBtn;
+    private JButton saveBtn, newRecBtn;
     private BufferedWriter writer;
     private boolean firstSample = true;
     private File currentAcquisitionFile;
@@ -86,12 +86,52 @@ public class BitalinoApp extends JFrame {
             System.exit(0);
         });
         saveBtn.addActionListener(e -> saveFileAction());
+        newRecBtn.addActionListener(e -> newRecording());
+
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Dimension screenSize = toolkit.getScreenSize();
 
         setSize(screenSize);
         setLocation(0, 0);
     }
+
+    private void newRecording() {
+        try {
+            // 1. Parar adquisición si estaba corriendo
+            running.set(false);
+            if (acquisitionThread != null && acquisitionThread.isAlive()) {
+                acquisitionThread.join();
+            }
+
+            // 2. Parar el dispositivo si está activo
+            try {
+                bitalino.stop();
+            } catch (Exception ignored) {}
+
+            // 3. Cerrar el dispositivo si está abierto
+            try {
+                bitalino.close();
+            } catch (Exception ignored) {}
+
+            // Reconectar el objeto BITalino
+            bitalino = new BITalino();
+
+        } catch (Exception ex) {
+            outputArea.append("Error resetting BITalino: " + ex.getMessage() + "\n");
+        }
+
+        // 4. Resetear UI
+        outputArea.setText("");            // limpia logs
+        signalPanel.clear();               // limpia gráfica → crear método abajo
+        startBtn.setEnabled(false);
+        stopBtn.setEnabled(false);
+        saveBtn.setEnabled(false);
+        connectBtn.setEnabled(true);       // hay que reconectar
+        firstSample = true;
+
+        outputArea.append("New recording ready, select new sampling rate to connect bitalino.\n");
+    }
+
 
     private JPanel crearHeaderPanel() {
         JPanel headerPanel = new JPanel(new BorderLayout());
@@ -105,9 +145,16 @@ public class BitalinoApp extends JFrame {
 
         Font buttonFont = new Font("Open sans", Font.BOLD, 18);
 
+        newRecBtn = createToolbarButton("New recording");
+        newRecBtn.setFont(buttonFont);
+        newRecBtn.setPreferredSize(new Dimension(200, 30));
+
+
         closeBtn = createToolbarButton("Close");
         closeBtn.setFont(buttonFont);
         closeBtn.setPreferredSize(new Dimension(100, 30));
+        closeBar.add(newRecBtn, BorderLayout.WEST);
+
 
         closeBar.add(closeBtn, BorderLayout.EAST);
 

@@ -13,6 +13,11 @@ public class SignalPanel extends JPanel {
         setBackground(Color.WHITE);
     }
 
+    public void clear() {
+        samples.clear();        // o tu lista interna de datos
+        repaint();
+    }
+
     public void addSample(int value) {
         samples.add(value);
 
