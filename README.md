@@ -100,7 +100,7 @@ These dependencies are installed automatically through Maven:
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-Usage
+## Usage
 
 ### 1. Connect to the BITalino Device
 - Enter the **MAC address** of your BITalino device.
