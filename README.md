@@ -1,11 +1,12 @@
 <a id="readme-top"></a>
 
+
 <br />
 <div align="center">
    <a href="https://github.com/alejandraoshea/sma-server">
-     <img src="logo.ico" alt="SMA Server Logo" width="80" height="80">
+     <img src="src/images/logo.svg" alt="SMA Server Logo" width="80" height="80">
    </a>
-  <h3 align="center">SMA Server</h3>
+  <h3 align="center">SMA Website</h3>
 
   <p align="center">
     Signal obtention application which allows to record EMG and ECG signlas thorugh a BITalino device and download them into a directory in your local computer.
@@ -26,12 +27,17 @@
 
  BITALINO-WINDOWS is an application designed to obtain a TXT file with a signal recording along with the sample rate. It supports:
 
-- BITalino connection with the computer
-- Sampling rate selection (10, 100 or 1000)
-- Selection of the signal type to record (ECG or EMG)
-- Stopping the signal acquisition when suitable or waiting for the maximum recording time to finish the recording (2 minutes)
-- Reporting system for doctors
+<div align="left">
 
+<ul>
+  <li>BITalino connection with the computer</li>
+  <li>Sampling rate selection (10, 100 or 1000)</li>
+  <li>Selection of the signal type to record (ECG or EMG)</li>
+  <li>Stopping the signal acquisition when suitable or waiting for the maximum recording time to finish the recording (2 minutes)</li>
+  <li>Reporting system for doctors</li>
+</ul>
+
+</div>
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ### Built With
