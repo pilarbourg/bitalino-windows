@@ -144,7 +144,7 @@ The MAC address will remain saved—just select the sampling rate and repeat the
 
 ---
 
-### 📌 Note
+#### Note
 You have a maximum of **2 minutes** to record your signal.  
 If you are not satisfied with the result, simply record again without saving the previous file to your computer.
 
