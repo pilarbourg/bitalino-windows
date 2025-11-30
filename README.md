@@ -36,92 +36,107 @@
 
 ### Built With
 
-* Java
-* Spring Boot
-* PostgreSQL
-
+* Java (JavaSwing implementation for the GUI)
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## Getting Started
 
-Follow these steps to set up a local development environment.
+<p><span style="color:red">IMPORTANT:</span> If you are here because you are a patient in MotivSMA, you should download the EXE file from the webpage. Go to: <a href="https://github.com/alejandraoshea/sma-client">https://github.com/alejandraoshea/sma-client</a> and follow the corresponding instructions.</p>
+
+---
+
+If you just want to make use of the code follow these steps to set up a local development environment:
 
 ### Prerequisites
 
-- Java 17+
-- Maven
-- PostgreSQL
-- PostgreSQL Database
+Before setting up the project locally, make sure you have the following installed:
+
+#### Software Requirements
+- *Java 21 (JDK 21)*
+- *Maven 3.8+*
+- A Java-compatible IDE
+- *Windows OS* (recommended for Bluetooth compatibility)
+
+#### Dependencies
+These dependencies are installed automatically through Maven:
+- `io.ultreia:bluecove:2.1.1` — Bluetooth communication
+- `org.apache.commons:commons-lang3:3.15.0` — Apache utility library
+
+#### Optional (for hardware testing)
+- A **BITalino** device
+
 
 ### Installation
 
 1. Clone the repository:
    ```sh
-   git clone https://github.com/alejandraoshea/sma-server.git
-   cd sma-server
+   git clone https://github.com/pilarbourg/bitalino-windows
+   cd bitalino-windows
 
-2. Configure your database in application-local.yml:
-   ```yaml
-   spring:
-     config:
-       activate:
-         on-profile: local
-   
-     datasource:
-       url: jdbc:postgresql://localhost:5432/telemedicine_local
-       driver-class-name: org.postgresql.Driver
-       hikari:
-         schema: public
-   
-   server:
-     port: 8443
-     ssl:
-       enabled: true
-       key-store: /path/to/your/keystore.p12
-       key-store-password: YOUR_KEYSTORE_PASSWORD
-       key-store-type: PKCS12
-       key-alias: YOUR_KEY_ALIAS
-   
-   admin:
-     username: ADMIN_USERNAME
-     password: ADMIN_PASSWORD
-   
-   operator:
-     username: OPERATOR_USERNAME
-     password: OPERATOR_PASSWORD
-   
-   jwt:
-     secret: JWT_SECRET
-     expiration: 3600000
-
-3. Build the project:
+2. Build the project:
    ```sh
    mvn clean install
 
-4. Start the server:
-   ```sh
-   mvn clean package
-   scripts/start-server.sh
-   Username: ADMIN_USERNAME
-   Password: ADMIN_PASSWORD
+3. Run the application:
 
-5. Stop the server:
-   ```sh
-   scripts/stop-server.sh
-   Username: ADMIN_USERNAME
-   Password: ADMIN_PASSWORD
+   Run the project by executing the `BitalinoApp` class, which contains the main entry point of the application.
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 Usage
 
-* API endpoints for patients, doctors, sessions, and signals are exposed via REST.
-* Upload ECG/EMG files to a session to store signals.
-* Generate report summaries for patient ECG/EMG measurement sessions.
-* Authentication & authorization (JWT)
-* Implementation of advanced signal analysis
-* Integration of notification system for doctor approvals
+### 1. Connect to the BITalino Device
+- Enter the **MAC address** of your BITalino device.
+- Select the correct **sampling rate** (as indicated by your doctor).
+- Make sure the BITalino is connected to your computer via **Bluetooth**.
+- Click the **Connect** button.
+
+If the connection is successful, a message will appear in the dashboard.
+
+> Example interface:
+> ![connect-example](docs/img/connect.png)
+
+---
+
+### 2. Start the Recording
+- Select the type of measurement you want to record (**ECG** or **EMG**).
+- Click the **Record** button (🔴).
+
+> Example interface:
+> ![record-example](docs/img/record.png)
+
+---
+
+### 3. Stop the Recording
+- When you want to stop, click the **Stop** button (⏹).
+- The elapsed time of the recording will be displayed in the dashboard.
+
+> Example interface:
+> ![stop-example](docs/img/stop.png)
+
+---
+
+### 4. Save the Recording
+- Once you are satisfied with the signal, click the **Save** button.
+- Choose a folder on your computer where you want to store the file.
+
+> Example interface:
+> ![save-example](docs/img/save.png)
+
+---
+
+### 5. Record Another Signal (Optional)
+If you wish to record another signal, click **New recording**.  
+The MAC address will remain saved—just select the sampling rate and repeat the previous steps.
+
+---
+
+### 📌 Note
+You have a maximum of **2 minutes** to record your signal.  
+If you are not satisfied with the result, simply record again without saving the previous file to your computer.
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
