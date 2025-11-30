@@ -150,8 +150,6 @@ If you are not satisfied with the result, simply record again without saving the
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 License
 
 Distributed under the MIT License.
