@@ -14,12 +14,16 @@ public class BitalinoApp extends JFrame {
 
     private BITalino bitalino;
     private JComboBox<Integer> samplingCombo;
-    private JComboBox<String> typeCombo;
-    private JButton connectBtn, startBtn, stopBtn, closeBtn;
-    private JTextArea outputArea;
+    public JComboBox<String> typeCombo;
+    public JButton connectBtn;
+    public JButton startBtn;
+    public JButton stopBtn;
+    private JButton closeBtn;
+    public JTextArea outputArea;
     private JScrollPane scrollPane;
-    private JTextField macField;
-    private JButton saveBtn, newRecBtn;
+    public JTextField macField;
+    public JButton saveBtn;
+    private JButton newRecBtn;
     private BufferedWriter writer;
     private boolean firstSample = true;
     private File currentAcquisitionFile;
@@ -27,7 +31,7 @@ public class BitalinoApp extends JFrame {
     private boolean isConnected = false;
 
 
-    private AtomicBoolean running = new AtomicBoolean(false);
+    public AtomicBoolean running = new AtomicBoolean(false);
     private Thread acquisitionThread;
 
     public BitalinoApp() {
@@ -100,7 +104,7 @@ public class BitalinoApp extends JFrame {
         setLocation(0, 0);
     }
 
-    private void newRecording() {
+    public void newRecording() {
         try {
             // 1. Parar adquisición si estaba corriendo
             running.set(false);
@@ -279,7 +283,7 @@ public class BitalinoApp extends JFrame {
 
 
 
-    private void connectAction(ActionEvent e) {
+    public void connectAction(ActionEvent e) {
         String mac = macField.getText().trim();
         if (mac.isEmpty()) {
             outputArea.append("Please enter the MAC address.\n");
@@ -305,7 +309,7 @@ public class BitalinoApp extends JFrame {
         }).start();
     }
 
-    private void startAction(ActionEvent e) {
+    public void startAction(ActionEvent e) {
         int [] channels = null;
         String type = typeCombo.getSelectedItem().toString();
         if (type.equals("EMG")) {
@@ -479,7 +483,33 @@ public class BitalinoApp extends JFrame {
             });
         });
 
-
-
     }
+
+    //FOR TESTS
+    BITalino getBitalino() {
+        return bitalino;
+    }
+
+    public void setBitalino(BITalino bitalino) {
+        this.bitalino = bitalino;
+    }
+
+    public JTextField getMacField() {
+        return macField;
+    }
+
+    public JComboBox<Integer> getSamplingCombo() {
+        return samplingCombo;
+    }
+
+    public JTextArea getOutputArea() {
+        return outputArea;
+    }
+
+    // Como connectAction es private, exponemos un wrapper
+    public void connectActionForTest(ActionEvent e) {
+        connectAction(e);
+    }
+
+
 }
