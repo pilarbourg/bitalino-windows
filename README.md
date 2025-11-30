@@ -1,21 +1,24 @@
 <a id="readme-top"></a>
 
-
 <br />
 <div align="center">
    <a href="https://github.com/alejandraoshea/sma-server">
      <img src="src/images/logo.svg" alt="SMA Server Logo" width="80" height="80">
    </a>
-  <h3 align="center">SMA Website</h3>
+
+<h3 align="center">SMA Website</h3>
 
   <p align="center">
-    Signal obtention application which allows to record EMG and ECG signlas thorugh a BITalino device and download them into a directory in your local computer.
-      
+    Signal obtention application which allows recording EMG and ECG signals through a BITalino device and downloading them into a directory in your local computer.
+  </p>
+</div>
+
+---
 
 <details>
   <summary>Table of Contents</summary>
   <ol>
-    <li><a href="#about-the-project">About The Application</a></li>
+    <li><a href="#about-the-application">About The Application</a></li>
     <li><a href="#built-with">Built With</a></li>
     <li><a href="#getting-started">Getting Started</a></li>
     <li><a href="#usage">Usage</a></li>
@@ -23,54 +26,60 @@
   </ol>
 </details>
 
+---
+
 ## About The Application
 
- BITALINO-WINDOWS is an application designed to obtain a TXT file with a signal recording along with the sample rate. It supports:
+BITALINO-WINDOWS is an application designed to obtain a TXT file with a signal recording along with the sample rate. It supports:
 
-<div align="left">
+- BITalino connection with the computer
+- Sampling rate selection (10, 100 or 1000)
+- Selection of the signal type to record (ECG or EMG)
+- Stopping the signal acquisition when suitable or waiting for the maximum recording time to finish the recording (2 minutes)
+- Reporting system for doctors
 
-<ul>
-  <li>BITalino connection with the computer</li>
-  <li>Sampling rate selection (10, 100 or 1000)</li>
-  <li>Selection of the signal type to record (ECG or EMG)</li>
-  <li>Stopping the signal acquisition when suitable or waiting for the maximum recording time to finish the recording (2 minutes)</li>
-  <li>Reporting system for doctors</li>
-</ul>
-
-</div>
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-### Built With
-
-* Java (JavaSwing implementation for the GUI)
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Getting Started
-
-<p><span style="color:red">IMPORTANT:</span> If you are here because you are a patient in MotivSMA, you should download the EXE file from the webpage. Go to: <a href="https://github.com/alejandraoshea/sma-client">https://github.com/alejandraoshea/sma-client</a> and follow the corresponding instructions.</p>
+<p align="right"><a href="#readme-top">back to top</a></p>
 
 ---
 
-If you just want to make use of the code follow these steps to set up a local development environment:
+## Built With
+
+- Java (JavaSwing implementation for the GUI)
+
+<p align="right"><a href="#readme-top">back to top</a></p>
+
+---
+
+## Getting Started
+
+<p><span style="color:red"><strong>IMPORTANT:</strong></span> If you are here because you are a patient in MotivSMA, you should download the EXE file from the webpage. Go to:  
+<a href="https://github.com/alejandraoshea/sma-client">https://github.com/alejandraoshea/sma-client</a>  
+and follow the corresponding instructions.</p>
+
+---
+
+If you just want to make use of the code, follow these steps to set up a local development environment:
 
 ### Prerequisites
 
 Before setting up the project locally, make sure you have the following installed:
 
 #### Software Requirements
-- *Java 21 (JDK 21)*
-- *Maven 3.8+*
+- Java 21 (JDK 21)
+- Maven 3.8+
 - A Java-compatible IDE
-- *Windows OS* (recommended for Bluetooth compatibility)
+- Windows OS (recommended for Bluetooth compatibility)
 
 #### Dependencies
 These dependencies are installed automatically through Maven:
+
 - `io.ultreia:bluecove:2.1.1` — Bluetooth communication
 - `org.apache.commons:commons-lang3:3.15.0` — Apache utility library
 
-#### Optional (for hardware testing)
+#### For testing
 - A **BITalino** device
 
+---
 
 ### Installation
 
