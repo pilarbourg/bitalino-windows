@@ -95,8 +95,8 @@ Usage
 
 If the connection is successful, a message will appear in the dashboard.
 
-> Example interface:
-> ![connect-example](docs/img/connect.png)
+> Starting interface with a succesful bitalino connection:
+> ![connect-example](src/images/img1.png)
 
 ---
 
@@ -104,17 +104,12 @@ If the connection is successful, a message will appear in the dashboard.
 - Select the type of measurement you want to record (**ECG** or **EMG**).
 - Click the **Record** button (🔴).
 
-> Example interface:
-> ![record-example](docs/img/record.png)
-
----
-
 ### 3. Stop the Recording
-- When you want to stop, click the **Stop** button (⏹).
+- When you want to stop, click the **Stop** button (■).
 - The elapsed time of the recording will be displayed in the dashboard.
 
-> Example interface:
-> ![stop-example](docs/img/stop.png)
+> Example interface with a recording still active:
+> ![stop-example](src/images/img2.png)
 
 ---
 
@@ -123,7 +118,7 @@ If the connection is successful, a message will appear in the dashboard.
 - Choose a folder on your computer where you want to store the file.
 
 > Example interface:
-> ![save-example](docs/img/save.png)
+> ![save-example](src/images/img3.png)
 
 ---
 
