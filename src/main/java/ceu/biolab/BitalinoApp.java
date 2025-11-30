@@ -24,6 +24,7 @@ public class BitalinoApp extends JFrame {
     private boolean firstSample = true;
     private File currentAcquisitionFile;
     private SignalPanel signalPanel;
+    private boolean isConnected = false;
 
 
     private AtomicBoolean running = new AtomicBoolean(false);
@@ -81,8 +82,12 @@ public class BitalinoApp extends JFrame {
         startBtn.addActionListener(this::startAction);
         stopBtn.addActionListener(this::stopAction);
         closeBtn.addActionListener(e -> {
-            stopAcquisition();
-            closeDevice();
+            if (isConnected) {
+                System.out.println("Closing BITalino connection...");
+                stopAcquisition();
+                closeDevice();
+            }
+            System.out.println("No BITalino connection established -> closing application...");
             System.exit(0);
         });
         saveBtn.addActionListener(e -> saveFileAction());
@@ -289,6 +294,7 @@ public class BitalinoApp extends JFrame {
                 bitalino.open(mac, rate); // <-- directly use MAC
                 SwingUtilities.invokeLater(() -> {
                     outputArea.append("Connected!\n");
+                    isConnected = true;
                     connectBtn.setEnabled(false);
                     startBtn.setEnabled(true);
                 });
