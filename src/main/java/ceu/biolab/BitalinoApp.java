@@ -82,7 +82,7 @@ public class BitalinoApp extends JFrame {
         startBtn.addActionListener(this::startAction);
         stopBtn.addActionListener(this::stopAction);
         closeBtn.addActionListener(e -> {
-            if (isConnected) {
+            if (bitalino != null) {
                 System.out.println("Closing BITalino connection...");
                 stopAcquisition();
                 closeDevice();
