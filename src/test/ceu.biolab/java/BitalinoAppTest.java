@@ -19,7 +19,7 @@ public class BitalinoAppTest {
 
     @Test
     void connect_emptyMac_showsErrorMessage() throws Exception {
-        // Crear la app en el hilo de Swing
+
         final BitalinoApp[] ref = new BitalinoApp[1];
 
         SwingUtilities.invokeAndWait(() -> {
@@ -28,13 +28,10 @@ public class BitalinoAppTest {
 
         BitalinoApp app = ref[0];
 
-        // Dejamos el campo MAC vacío
         app.macField.setText("");
 
-        // Llamamos a la acción de conectar
         app.connectAction(new ActionEvent(app, 0, "connect"));
 
-        // Verificamos el mensaje
         String output = app.outputArea.getText();
         assertTrue(output.contains("Please enter the MAC address."),
                 "Debe pedir al usuario que introduzca la MAC");
@@ -69,7 +66,6 @@ public class BitalinoAppTest {
     void newRecording_resetsUiAndState() {
         BitalinoApp app = new BitalinoApp();
 
-        // simulate previous run
         app.outputArea.setText("Old logs");
         app.startBtn.setEnabled(true);
         app.stopBtn.setEnabled(true);
@@ -100,10 +96,8 @@ public class BitalinoAppTest {
         app.getSamplingCombo().setSelectedItem(100);
         app.typeCombo.setSelectedItem("EMG");
 
-        // llamamos directamente al startAction
         app.startAction(new ActionEvent(app, 0, "start"));
 
-        // verificamos que se ha llamado a start con el canal correcto
         verify(mockDevice).start(new int[]{0});
         assertTrue(app.running.get());
         assertFalse(app.startBtn.isEnabled());

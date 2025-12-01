@@ -42,13 +42,13 @@ public class BitalinoApp extends JFrame {
 
         // Panel raíz
         JPanel root = new JPanel(new BorderLayout());
-        root.setBackground(Color.WHITE);  // solo para que no se vea gris
+        root.setBackground(Color.WHITE);
 
-        //CABECERA (dos barras)
-        JPanel headerPanel = crearHeaderPanel();  // -> función que te pongo abajo
+
+        JPanel headerPanel = crearHeaderPanel();
         root.add(headerPanel, BorderLayout.NORTH);
 
-        //Zona inferior: gráfica + logs
+
         outputArea = new JTextArea(8, 50);
         outputArea.setEditable(false);
         outputArea.setFont(new Font("Monospaced", Font.PLAIN, 16));
@@ -56,7 +56,6 @@ public class BitalinoApp extends JFrame {
 
         signalPanel = new SignalPanel();
 
-        // Scroll horizontal para la señal
         JScrollPane signalScroll = new JScrollPane(
                 signalPanel,
                 ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER,
@@ -64,7 +63,6 @@ public class BitalinoApp extends JFrame {
         );
         signalScroll.getViewport().setBackground(Color.BLACK);
 
-        // Split vertical: arriba gráfica (con scroll), abajo logs
         JSplitPane splitPane = new JSplitPane(
                 JSplitPane.VERTICAL_SPLIT,
                 signalScroll,
@@ -72,16 +70,13 @@ public class BitalinoApp extends JFrame {
         );
         splitPane.setResizeWeight(0.7);
 
-        // === Layout principal ===
-        //setLayout(new BorderLayout());
-        //add(topPanel, BorderLayout.NORTH);
-        root.add(splitPane, BorderLayout.CENTER);  // <-- solo el splitPane, nada más
+        root.add(splitPane, BorderLayout.CENTER);
         setContentPane(root);
 
         pack();
-        setLocationRelativeTo(null); // en fullscreen no importa mucho, pero lo dejamos
+        setLocationRelativeTo(null);
 
-        // === Listeners ===
+
         connectBtn.addActionListener(this::connectAction);
         startBtn.addActionListener(this::startAction);
         stopBtn.addActionListener(this::stopAction);
@@ -129,13 +124,13 @@ public class BitalinoApp extends JFrame {
             outputArea.append("Error resetting BITalino: " + ex.getMessage() + "\n");
         }
 
-        // 4. Resetear UI
-        outputArea.setText("");            // limpia logs
-        signalPanel.clear();               // limpia gráfica → crear método abajo
+
+        outputArea.setText("");
+        signalPanel.clear();
         startBtn.setEnabled(false);
         stopBtn.setEnabled(false);
         saveBtn.setEnabled(false);
-        connectBtn.setEnabled(true);       // hay que reconectar
+        connectBtn.setEnabled(true);
         firstSample = true;
 
         outputArea.append("New recording ready, select new sampling rate to connect bitalino.\n");
@@ -177,7 +172,7 @@ public class BitalinoApp extends JFrame {
         Font labelFont  = new Font("Open sans", Font.BOLD, 18);
         Font fieldFont  = new Font("Monospaced", Font.BOLD, 18);
 
-        // IZQUIERDA
+
         JPanel leftPanel = new JPanel();
         leftPanel.setOpaque(false);
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.X_AXIS));
@@ -210,11 +205,6 @@ public class BitalinoApp extends JFrame {
         leftPanel.add(Box.createRigidArea(new Dimension(10, 0)));
         connectBtn = createToolbarButton("Connect");
         leftPanel.add(connectBtn);
-        //leftPanel.add(Box.createRigidArea(new Dimension(10, 0)));
-
-
-
-        // DERECHA
 
         JPanel rightPanel = new JPanel();
         rightPanel.setOpaque(false);
@@ -295,7 +285,7 @@ public class BitalinoApp extends JFrame {
 
         new Thread(() -> {
             try {
-                bitalino.open(mac, rate); // <-- directly use MAC
+                bitalino.open(mac, rate);
                 SwingUtilities.invokeLater(() -> {
                     outputArea.append("Connected!\n");
                     isConnected = true;
@@ -318,7 +308,7 @@ public class BitalinoApp extends JFrame {
             channels = new int[]{1};   // a2
         } else {
             outputArea.append("Please select a type of recording.\n");
-            return; // evita continuar con channels = null
+            return;
         }
 
 
@@ -411,7 +401,6 @@ public class BitalinoApp extends JFrame {
         long startTimeMs = System.currentTimeMillis();
 
         try {
-            // Segunda línea: empezamos una línea de datos
             firstSample = true;
             int durationSeconds = 2*60;
             long maxDurationMs = durationSeconds * 1000L;
@@ -424,7 +413,6 @@ public class BitalinoApp extends JFrame {
                 for (Frame f : frames) {
                     int a2 = f.analog[0];
 
-                    // Escribir en buffer → valores separados por comas
                     if (!firstSample) {
                         writer.write(",");
                     }
@@ -449,7 +437,6 @@ public class BitalinoApp extends JFrame {
                 }
             }
 
-            // Cuando termina la adquisición → cerrar línea
             writer.newLine();
             writer.flush();
 
@@ -471,8 +458,6 @@ public class BitalinoApp extends JFrame {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
-            // O si tienes FlatLaf añadido:
-            // FlatLightLaf.setup();
         } catch (Exception e) {
             e.printStackTrace();
         }
